@@ -63,26 +63,24 @@ export type SupportedTimezones =
 
 export interface Config {
   auth: {
-    users: UserAuthOperations;
+    usuarios: UsuarioAuthOperations;
   };
   blocks: {};
   collections: {
-    users: User;
-    media: Media;
-    categories: Category;
-    posts: Post;
-    pages: Page;
+    usuarios: Usuario;
+    archivos: Archivo;
+    categorias: Categoria;
+    articulos: Articulo;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
-    categories: CategoriesSelect<false> | CategoriesSelect<true>;
-    posts: PostsSelect<false> | PostsSelect<true>;
-    pages: PagesSelect<false> | PagesSelect<true>;
+    usuarios: UsuariosSelect<false> | UsuariosSelect<true>;
+    archivos: ArchivosSelect<false> | ArchivosSelect<true>;
+    categorias: CategoriasSelect<false> | CategoriasSelect<true>;
+    articulos: ArticulosSelect<false> | ArticulosSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -90,18 +88,22 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    paginas: Pagina;
+  };
+  globalsSelect: {
+    paginas: PaginasSelect<false> | PaginasSelect<true>;
+  };
   locale: null;
-  user: User & {
-    collection: 'users';
+  user: Usuario & {
+    collection: 'usuarios';
   };
   jobs: {
     tasks: unknown;
     workflows: unknown;
   };
 }
-export interface UserAuthOperations {
+export interface UsuarioAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -121,9 +123,9 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
+ * via the `definition` "usuarios".
  */
-export interface User {
+export interface Usuario {
   id: string;
   roles?: ('admin' | 'editor')[] | null;
   updatedAt: string;
@@ -139,11 +141,12 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
+ * via the `definition` "archivos".
  */
-export interface Media {
+export interface Archivo {
   id: string;
-  alt: string;
+  alt?: string | null;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -155,30 +158,12 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-  sizes?: {
-    thumbnail?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    card?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
+ * via the `definition` "categorias".
  */
-export interface Category {
+export interface Categoria {
   id: string;
   title: string;
   slug?: string | null;
@@ -187,44 +172,18 @@ export interface Category {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
+ * via the `definition` "articulos".
  */
-export interface Post {
+export interface Articulo {
   id: string;
   title: string;
+  subtitle: string;
   slug?: string | null;
-  category: string | Category;
-  /**
-   * Contenido principal del blog post con formato y multimedia.
-   */
-  content: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  /**
-   * Imagen principal que aparecerá en la lista de posts y como hero.
-   */
-  featuredImage?: (string | null) | Media;
-  /**
-   * Lista de URLs de videos para incrustar en el post.
-   */
-  embeddedVideos?:
+  category: string | Categoria;
+  content: string;
+  imagenes?:
     | {
-        /**
-         * URL de YouTube o Vimeo. Asegúrate de que tu frontend (Astro) pueda incrustarla correctamente.
-         */
-        url: string;
+        imagen: string | Archivo;
         id?: string | null;
       }[]
     | null;
@@ -236,102 +195,7 @@ export interface Post {
    * La fecha en que el post fue publicado (se establece automáticamente al publicar).
    */
   publishedDate?: string | null;
-  author?: (string | null) | User;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Gestiona las páginas estáticas y su contenido flexible.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages".
- */
-export interface Page {
-  id: string;
-  title: string;
-  /**
-   * La parte de la URL para esta página (ej: "acerca-de", "servicios").
-   */
-  slug: string;
-  layout?:
-    | (
-        | {
-            heading: string;
-            /**
-             * Contenido principal del blog post con formato y multimedia.
-             */
-            content: {
-              root: {
-                type: string;
-                children: {
-                  type: string;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            };
-            image: string | Media;
-            imagePosition: 'left' | 'right';
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'imageTextBlock';
-          }
-        | {
-            heading: string;
-            description: string;
-            buttonText: string;
-            /**
-             * URL a donde dirigirá el botón (ej: /contacto, https://ejemplo.com)
-             */
-            buttonLink: string;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'ctaBlock';
-          }
-        | {
-            /**
-             * Contenido principal del blog post con formato y multimedia.
-             */
-            content: {
-              root: {
-                type: string;
-                children: {
-                  type: string;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            };
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'richContentBlock';
-          }
-      )[]
-    | null;
-  meta?: {
-    /**
-     * Título para el navegador y motores de búsqueda.
-     */
-    title?: string | null;
-    /**
-     * Breve resumen para los motores de búsqueda.
-     */
-    description?: string | null;
-    /**
-     * Palabras clave separadas por comas.
-     */
-    keywords?: string | null;
-  };
+  author?: (string | null) | Usuario;
   updatedAt: string;
   createdAt: string;
 }
@@ -343,29 +207,25 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
-        relationTo: 'users';
-        value: string | User;
+        relationTo: 'usuarios';
+        value: string | Usuario;
       } | null)
     | ({
-        relationTo: 'media';
-        value: string | Media;
+        relationTo: 'archivos';
+        value: string | Archivo;
       } | null)
     | ({
-        relationTo: 'categories';
-        value: string | Category;
+        relationTo: 'categorias';
+        value: string | Categoria;
       } | null)
     | ({
-        relationTo: 'posts';
-        value: string | Post;
-      } | null)
-    | ({
-        relationTo: 'pages';
-        value: string | Page;
+        relationTo: 'articulos';
+        value: string | Articulo;
       } | null);
   globalSlug?: string | null;
   user: {
-    relationTo: 'users';
-    value: string | User;
+    relationTo: 'usuarios';
+    value: string | Usuario;
   };
   updatedAt: string;
   createdAt: string;
@@ -377,8 +237,8 @@ export interface PayloadLockedDocument {
 export interface PayloadPreference {
   id: string;
   user: {
-    relationTo: 'users';
-    value: string | User;
+    relationTo: 'usuarios';
+    value: string | Usuario;
   };
   key?: string | null;
   value?:
@@ -406,9 +266,9 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
+ * via the `definition` "usuarios_select".
  */
-export interface UsersSelect<T extends boolean = true> {
+export interface UsuariosSelect<T extends boolean = true> {
   roles?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -422,10 +282,11 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
+ * via the `definition` "archivos_select".
  */
-export interface MediaSelect<T extends boolean = true> {
+export interface ArchivosSelect<T extends boolean = true> {
   alt?: T;
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -437,36 +298,12 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-  sizes?:
-    | T
-    | {
-        thumbnail?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        card?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories_select".
+ * via the `definition` "categorias_select".
  */
-export interface CategoriesSelect<T extends boolean = true> {
+export interface CategoriasSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   updatedAt?: T;
@@ -474,71 +311,23 @@ export interface CategoriesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_select".
+ * via the `definition` "articulos_select".
  */
-export interface PostsSelect<T extends boolean = true> {
+export interface ArticulosSelect<T extends boolean = true> {
   title?: T;
+  subtitle?: T;
   slug?: T;
   category?: T;
   content?: T;
-  featuredImage?: T;
-  embeddedVideos?:
+  imagenes?:
     | T
     | {
-        url?: T;
+        imagen?: T;
         id?: T;
       };
   status?: T;
   publishedDate?: T;
   author?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages_select".
- */
-export interface PagesSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  layout?:
-    | T
-    | {
-        imageTextBlock?:
-          | T
-          | {
-              heading?: T;
-              content?: T;
-              image?: T;
-              imagePosition?: T;
-              id?: T;
-              blockName?: T;
-            };
-        ctaBlock?:
-          | T
-          | {
-              heading?: T;
-              description?: T;
-              buttonText?: T;
-              buttonLink?: T;
-              id?: T;
-              blockName?: T;
-            };
-        richContentBlock?:
-          | T
-          | {
-              content?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
-  meta?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        keywords?: T;
-      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -573,6 +362,309 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "paginas".
+ */
+export interface Pagina {
+  id: string;
+  inicio?: {
+    meta?: {
+      /**
+       * Título para el navegador y motores de búsqueda.
+       */
+      title?: string | null;
+      /**
+       * Breve resumen para los motores de búsqueda.
+       */
+      description?: string | null;
+      /**
+       * Palabras clave separadas por comas.
+       */
+      keywords?: string | null;
+    };
+    inicio?:
+      | {
+          title: string;
+          /**
+           * Selecciona los articulos que deseas mostrar en este bloque.
+           */
+          articulo?:
+            | {
+                post: string | Articulo;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+    contenido?:
+      | (
+          | {
+              heading: string;
+              /**
+               * Selecciona los articulos que deseas mostrar en este bloque.
+               */
+              articulo?:
+                | {
+                    post: string | Articulo;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'detailSideMediaBlock';
+            }
+          | {
+              /**
+               * Selecciona los articulos que deseas mostrar en este bloque.
+               */
+              articulo?:
+                | {
+                    post: string | Articulo;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'bannerBlock';
+            }
+          | {
+              /**
+               * Selecciona los articulos que deseas mostrar en este bloque.
+               */
+              articulo?:
+                | {
+                    post: string | Articulo;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'exploreBlock';
+            }
+          | {
+              title: string;
+              /**
+               * Selecciona los articulos que deseas mostrar en este bloque.
+               */
+              articulo?:
+                | {
+                    post: string | Articulo;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'carouselThreeColumns';
+            }
+          | {
+              title: string;
+              /**
+               * Selecciona los articulos que deseas mostrar en este bloque.
+               */
+              articulo?:
+                | {
+                    post: string | Articulo;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'carouselTwoColumns';
+            }
+          | {
+              /**
+               * Selecciona los articulos que deseas mostrar en este bloque.
+               */
+              articulo?:
+                | {
+                    post: string | Articulo;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+              blockName?: string | null;
+              blockType: 'TwoColumns';
+            }
+        )[]
+      | null;
+    cierre?:
+      | {
+          /**
+           * Selecciona los articulos que deseas mostrar en este bloque.
+           */
+          articulo?:
+            | {
+                post: string | Articulo;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  acerca: {
+    introduction?: string | null;
+    biography?: string | null;
+    phrase?: string | null;
+    imageOne: string | Archivo;
+    imageTwo: string | Archivo;
+    imageThree: string | Archivo;
+    imageFour: string | Archivo;
+    social?: {
+      email?: string | null;
+      facebook?: string | null;
+      youtube?: string | null;
+      tiktok?: string | null;
+      twitter?: string | null;
+    };
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "paginas_select".
+ */
+export interface PaginasSelect<T extends boolean = true> {
+  inicio?:
+    | T
+    | {
+        meta?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              keywords?: T;
+            };
+        inicio?:
+          | T
+          | {
+              title?: T;
+              articulo?:
+                | T
+                | {
+                    post?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+        contenido?:
+          | T
+          | {
+              detailSideMediaBlock?:
+                | T
+                | {
+                    heading?: T;
+                    articulo?:
+                      | T
+                      | {
+                          post?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+              bannerBlock?:
+                | T
+                | {
+                    articulo?:
+                      | T
+                      | {
+                          post?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+              exploreBlock?:
+                | T
+                | {
+                    articulo?:
+                      | T
+                      | {
+                          post?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+              carouselThreeColumns?:
+                | T
+                | {
+                    title?: T;
+                    articulo?:
+                      | T
+                      | {
+                          post?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+              carouselTwoColumns?:
+                | T
+                | {
+                    title?: T;
+                    articulo?:
+                      | T
+                      | {
+                          post?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+              TwoColumns?:
+                | T
+                | {
+                    articulo?:
+                      | T
+                      | {
+                          post?: T;
+                          id?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+            };
+        cierre?:
+          | T
+          | {
+              articulo?:
+                | T
+                | {
+                    post?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+      };
+  acerca?:
+    | T
+    | {
+        introduction?: T;
+        biography?: T;
+        phrase?: T;
+        imageOne?: T;
+        imageTwo?: T;
+        imageThree?: T;
+        imageFour?: T;
+        social?:
+          | T
+          | {
+              email?: T;
+              facebook?: T;
+              youtube?: T;
+              tiktok?: T;
+              twitter?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

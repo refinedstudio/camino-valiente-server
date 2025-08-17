@@ -25,8 +25,6 @@ services:
       - --storageEngine=wiredTiger
     volumes:
       - data:/data/db
-    logging:
-      driver: none
 
   # Uncomment the following to use postgres
   # postgres:

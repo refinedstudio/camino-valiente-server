@@ -2,8 +2,8 @@ import type { CollectionConfig } from 'payload'
 import { isAdmin, anyone } from '../access/isAdmin'
 import { generateSlug } from '../hooks/generateSlug'
 
-const Categories: CollectionConfig = {
-  slug: 'categories',
+const Categorias: CollectionConfig = {
+  slug: 'categorias',
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'updatedAt'],
@@ -37,4 +37,4 @@ const Categories: CollectionConfig = {
   ],
 }
 
-export default Categories
+export default Categorias

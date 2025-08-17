@@ -1,9 +1,8 @@
 import type { CollectionConfig, FieldAccess } from 'payload'
-import type { User } from '../types'
 import { isAdmin } from '../access/isAdmin'
 
-const Users: CollectionConfig = {
-  slug: 'users',
+const Usuarios: CollectionConfig = {
+  slug: 'usuarios',
   auth: true,
   admin: {
     useAsTitle: 'email',
@@ -27,9 +26,9 @@ const Users: CollectionConfig = {
         { label: 'Editor', value: 'editor' },
       ],
       access: {
-        read: isAdmin as FieldAccess<User, User>,
-        create: isAdmin as FieldAccess<User, User>,
-        update: isAdmin as FieldAccess<User, User>,
+        read: isAdmin as FieldAccess<any, any>,
+        create: isAdmin as FieldAccess<any, any>,
+        update: isAdmin as FieldAccess<any, any>,
       },
     },
   ],
@@ -37,15 +36,15 @@ const Users: CollectionConfig = {
     afterChange: [
       async ({ doc, req }) => {
         const users = await req.payload.find({
-          collection: 'users',
+          collection: 'usuarios',
           depth: 0,
           limit: 1,
         })
-        if (users.docs.length === 0 && !(doc as User).roles?.includes('admin')) {
+        if (users.docs.length === 0 && !(doc as any).roles?.includes('admin')) {
           await req.payload.update({
-            collection: 'users',
+            collection: 'usuarios',
             id: doc.id,
-            data: { roles: ['admin'] as User['roles'] },
+            data: { roles: ['admin'] as any },
           })
           req.payload.logger.info(`Primer usuario ${doc.email} establecido como admin.`)
         }
@@ -54,4 +53,4 @@ const Users: CollectionConfig = {
   },
 }
 
-export default Users
+export default Usuarios

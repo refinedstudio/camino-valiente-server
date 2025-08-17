@@ -1,11 +1,10 @@
 import type { CollectionConfig } from 'payload'
-import type { Post } from '../types'
 import { isAdmin } from '../access/isAdmin'
 import { generateSlug } from '../hooks/generateSlug'
 import { richText } from '../fields/richText'
 
-const Posts: CollectionConfig = {
-  slug: 'posts',
+const Articulos: CollectionConfig = {
+  slug: 'articulos',
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'status', 'category', 'updatedAt'],
@@ -38,7 +37,13 @@ const Posts: CollectionConfig = {
       name: 'title',
       type: 'text',
       required: true,
-      label: 'Título del Post',
+      label: 'Título del artículo',
+    },
+    {
+      name: 'subtitle',
+      type: 'text',
+      required: true,
+      label: 'Subtítulo del artículo',
     },
     {
       name: 'slug',
@@ -55,45 +60,34 @@ const Posts: CollectionConfig = {
     {
       name: 'category',
       type: 'relationship',
-      relationTo: 'categories', // Relación con la colección 'categories'
+      relationTo: 'categorias', // Relación con la colección 'categories'
       required: true,
       label: 'Categoría',
       admin: {
         position: 'sidebar',
       },
     },
-    richText,
     {
-      name: 'featuredImage',
-      type: 'upload',
-      relationTo: 'media', // Relación con la colección 'media'
-      label: 'Imagen Destacada',
-      required: false,
-      admin: {
-        description: 'Imagen principal que aparecerá en la lista de posts y como hero.',
-      },
+      name: 'content',
+      type: 'textarea',
+      label: 'Contenido del artículo',
+      required: true,
     },
     {
-      name: 'embeddedVideos',
+      name: 'imagenes',
       type: 'array',
-      label: 'Videos Embebidos',
-      minRows: 0,
-      maxRows: 5,
+      label: 'Imágenes del artículo',
+      maxRows: 16,
+      minRows: 4,
       fields: [
         {
-          name: 'url',
-          type: 'text',
-          label: 'URL de Video (YouTube/Vimeo)',
+          name: 'imagen',
+          type: 'upload',
+          relationTo: 'archivos',
+          label: 'Imagen',
           required: true,
-          admin: {
-            description:
-              'URL de YouTube o Vimeo. Asegúrate de que tu frontend (Astro) pueda incrustarla correctamente.',
-          },
         },
       ],
-      admin: {
-        description: 'Lista de URLs de videos para incrustar en el post.',
-      },
     },
     {
       name: 'status',
@@ -119,14 +113,14 @@ const Posts: CollectionConfig = {
           'La fecha en que el post fue publicado (se establece automáticamente al publicar).',
 
         condition: (data: Record<string, unknown>) => {
-          const postData = data as unknown as Post
+          const postData = data as any
           return postData && typeof postData.status === 'string' && postData.status === 'published'
         },
       },
       hooks: {
         beforeChange: [
           ({ data, value }) => {
-            const postData = data as Post
+            const postData = data as any
             if (postData.status === 'published' && !value) {
               return new Date().toISOString()
             }
@@ -141,7 +135,7 @@ const Posts: CollectionConfig = {
     {
       name: 'author',
       type: 'relationship',
-      relationTo: 'users', // Relación con la colección 'users'
+      relationTo: 'usuarios', // Relación con la colección 'users'
       defaultValue: ({ user }) => user?.id, // Asigna automáticamente el usuario logueado como autor
       admin: {
         position: 'sidebar',
@@ -152,8 +146,8 @@ const Posts: CollectionConfig = {
   ],
   // Hook para eliminar referencias de media al borrar un post (avanzado)
   hooks: {
-    afterDelete: [async ({}) => {}],
+    afterDelete: [async ({ }) => { }],
   },
 }
 
-export default Posts
+export default Articulos

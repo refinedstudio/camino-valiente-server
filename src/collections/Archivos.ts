@@ -1,15 +1,11 @@
 import type { CollectionConfig } from 'payload'
 import { isAdmin, anyone } from '../access/isAdmin'
 
-const Media: CollectionConfig = {
-  slug: 'media',
+
+const Archivos: CollectionConfig = {
+  slug: 'archivos',
   upload: {
-    staticDir: './uploads',
-    mimeTypes: ['image/*', 'video/*'],
-    imageSizes: [
-      { name: 'thumbnail', width: 400, height: 300, position: 'centre' },
-      { name: 'card', width: 768, height: 480, position: 'centre' },
-    ],
+    mimeTypes: ['image/*'],
   },
   admin: {
     useAsTitle: 'filename',
@@ -17,7 +13,7 @@ const Media: CollectionConfig = {
     group: 'Contenido',
   },
   access: {
-    read: anyone, // Todos pueden leer los archivos multimedia
+    read: anyone, // Todos pueden leer (o controla con permisos)
     create: isAdmin,
     update: isAdmin,
     delete: isAdmin,
@@ -26,10 +22,10 @@ const Media: CollectionConfig = {
     {
       name: 'alt',
       type: 'text',
-      required: true,
+      required: false,
       label: 'Texto Alternativo (Alt Text)',
     },
   ],
 }
 
-export default Media
+export default Archivos
