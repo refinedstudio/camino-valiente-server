@@ -18,7 +18,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfig({
-  serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL || 'http://localhost:3000',
+  serverURL: 'http://localhost:3000',
   i18n: {
     fallbackLanguage: 'es',
     supportedLanguages: { es, en },
@@ -37,28 +37,28 @@ export default buildConfig({
     url: process.env.DATABASE_URI || '',
   }),
   sharp,
-  plugins: [payloadCloudPlugin(),
-
-
-  s3Storage({
-    bucket: process.env.S3_BUCKET!, // 'caminovaliente-aws-test'
-    config: {
-      region: process.env.S3_REGION!, // 'us-east-1'
-      credentials: {
-        accessKeyId: process.env.S3_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
+  plugins: [
+    s3Storage({
+      bucket: process.env.S3_BUCKET!, // 'caminovaliente-aws-test'
+      config: {
+        region: process.env.S3_REGION!, // 'us-east-1'
+        credentials: {
+          accessKeyId: process.env.S3_ACCESS_KEY_ID!,
+          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
+        },
       },
-    },
-    acl: 'public-read',           // hace accesible la URL públicamente
-    disableLocalStorage: true,    // evita guardar en local
-    collections: {
-      archivos: {
-        prefix: 'public',          // carpeta dentro del bucket
-        signedDownloads: false,    // no usamos URLs pre-firmadas
+      acl: 'public-read', // hace accesible la URL públicamente
+      disableLocalStorage: true, // evita guardar en local
+      collections: {
+        archivos: {
+          prefix: 'public', // carpeta dentro del bucket
+          signedDownloads: false, // no usamos URLs pre-firmadas
+          generateFileURL: ({ filename, prefix }) => {
+            return `https://${process.env.S3_BUCKET}.s3.${process.env.S3_REGION}.amazonaws.com/${prefix}/${filename}`
+          },
+        },
       },
-    },
-  }),
-
+    }),
   ],
   graphQL: {
     schemaOutputFile: path.resolve(dirname, 'generated-schema.graphql'),
